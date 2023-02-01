@@ -1,3 +1,7 @@
+.list_container {
+  font-size: 20px;
+}
+
 .contactsList {
   border-radius: 5px;
   justify-content: center;

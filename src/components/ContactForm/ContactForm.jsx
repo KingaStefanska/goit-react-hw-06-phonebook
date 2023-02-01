@@ -1,50 +1,49 @@
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
-import PropTypes from 'react';
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { getContacts } from 'redux/selectors';
+import { addNewContact } from 'redux/actions';
 import css from './ContactForm.module.css';
 
-const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-
+const ContactForm = () => {
   const id = nanoid();
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
-  const handleChange = e => {
-    const value = e.currentTarget.name;
-    switch (value) {
-      case 'name':
-        setName(e.currentTarget.value);
-        break;
-      case 'number':
-        setNumber(e.currentTarget.value);
-        break;
-      default:
-        return 'Error';
-    }
-  };
-
-  const handleSubmit = e => {
+  const addContact = e => {
     e.preventDefault();
-    onSubmit({ name, number });
-    setName('');
-    setNumber('');
-    reset();
-  };
 
-  const reset = () => {
-    setName('');
-    setNumber('');
+    const form = e.target;
+    const name = form.name.value;
+    const number = form.number.value;
+    const normalizedName = name.toLowerCase();
+    let nameOntheList = false;
+
+    const newContact = {
+      id: nanoid(),
+      name: name,
+      number: number,
+    };
+
+    contacts.forEach(contact => {
+      if (contact.name.toLowerCase() === normalizedName) {
+        alert(`${contact.name} is already in contacts`);
+        nameOntheList = true;
+      }
+    });
+
+    if (nameOntheList) return;
+
+    dispatch(addNewContact(newContact));
+    form.reset();
   };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
+    <form className={css.form} onSubmit={addContact}>
       <label htmlFor={id}>Name</label>
       <input
         className={css.formInput}
         id={id}
-        onChange={handleChange}
-        value={name}
         type="text"
         name="name"
         pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -57,8 +56,6 @@ const ContactForm = ({ onSubmit }) => {
         id={id}
         type="tel"
         name="number"
-        value={number}
-        onChange={handleChange}
         pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
         title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
         required
@@ -68,15 +65,6 @@ const ContactForm = ({ onSubmit }) => {
       </button>
     </form>
   );
-};
-
-ContactForm.prototype = {
-  onSubmit: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      number: PropTypes.number.isRequired,
-    })
-  ),
 };
 
 export default ContactForm;

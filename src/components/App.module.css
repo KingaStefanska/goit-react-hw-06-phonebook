@@ -11,10 +11,6 @@
   flex-direction: column;
 }
 
-.list_container {
-  font-size: 20px;
-}
-
 ul {
   list-style: none;
 }
